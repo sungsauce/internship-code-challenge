@@ -12,6 +12,7 @@ class ufoGame {
     this.lettersLeft = Infinity
     this.guesses = null
     this.gameInterface = null
+    this.dictMatches = nounsArr
     this.guess = this.guess.bind(this)
   }
 
@@ -58,14 +59,20 @@ class ufoGame {
       process.stdin.removeAllListeners('data')
       process.stdin.on('data', input => this.restart(input))
       const endCopy = isWinner
-        ? `\nCorrect! You saved the person and earned a medal of honor!\nThe codeword is: ${this.codeword}.`
+        ? `\nCorrect! You saved the person and earned a medal of honor!\nThe codeword is: ${
+            this.codeword
+          }.`
         : `\nOh no! You've failed to save the person from the UFO!\n${
             frames[frames.length - 1]
           }\nThe codeword was: ${this.codeword}.`
-      process.stdout.write(`${endCopy}\n\n>> Would you like to play again (Y/N)? `)
+      process.stdout.write(
+        `${endCopy}\n\n>> Would you like to play again (Y/N)? `
+      )
     } else {
       this.makeNewInterface(result)
-      process.stdout.write(`${this.gameInterface}\n\n>> Please enter your guess: `)
+      process.stdout.write(
+        `${this.gameInterface}\n\n>> Please enter your guess: `
+      )
     }
   }
 
@@ -84,9 +91,13 @@ class ufoGame {
             this.slots[i] = input
             this.lettersLeft--
           })
+          this.dictMatches = this.dictMatches.filter(word => {
+            return this.wordDict[input].every(i => word[i] === input.toLowerCase())
+          })
           this.play('correct')
         } else {
           this.incorrectGuesses.push(input)
+          this.dictMatches = this.dictMatches.filter(word => !word.includes(input.toLowerCase()))
           this.play('incorrect')
         }
       }
@@ -125,7 +136,9 @@ class ufoGame {
       frames[this.incorrectGuesses.length]
     }\n\nIncorrect Guesses:\n${
       this.incorrectGuesses.length ? this.incorrectGuesses.join(' ') : 'None'
-    }\n\nCodeword:\n${this.slots.join(' ')}`
+    }\n\nCodeword:\n${this.slots.join(' ')}\n\nNumber of dictionary matches: ${
+      this.dictMatches.length
+    }`
   }
 }
 

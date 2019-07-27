@@ -81,26 +81,24 @@ class ufoGame {
     const alpha = /[a-z]/gi
     const isValid = input.length === 1 && alpha.test(input)
 
-    if (isValid) {
-      if (this.guesses.has(input)) {
-        this.play('duplicate')
+    if (isValid && !this.guesses.has(input)) {
+      this.guesses.add(input)
+      if (this.wordDict[input]) {
+        this.wordDict[input].forEach(i => {
+          this.slots[i] = input
+          this.lettersLeft--
+        })
+        this.dictMatches = this.dictMatches.filter(word => {
+          return this.wordDict[input].every(i => word[i] === input.toLowerCase())
+        })
+        this.play('correct')
       } else {
-        this.guesses.add(input)
-        if (this.wordDict[input]) {
-          this.wordDict[input].forEach(i => {
-            this.slots[i] = input
-            this.lettersLeft--
-          })
-          this.dictMatches = this.dictMatches.filter(word => {
-            return this.wordDict[input].every(i => word[i] === input.toLowerCase())
-          })
-          this.play('correct')
-        } else {
-          this.incorrectGuesses.push(input)
-          this.dictMatches = this.dictMatches.filter(word => !word.includes(input.toLowerCase()))
-          this.play('incorrect')
-        }
+        this.incorrectGuesses.push(input)
+        this.dictMatches = this.dictMatches.filter(word => !word.includes(input.toLowerCase()))
+        this.play('incorrect')
       }
+    } else if (isValid && this.guesses.has(input)) {
+      this.play('duplicate')
     } else {
       this.play('invalid')
     }
